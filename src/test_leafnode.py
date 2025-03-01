@@ -15,3 +15,4 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_to_html_h1(self):
         node = LeafNode(tag="h1", value="Hello, world!")
         self.assertEqual(node.to_html(), "<h1>Hello, world!</h1>")
+
