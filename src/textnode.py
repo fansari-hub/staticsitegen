@@ -20,7 +20,7 @@ class TextNode():
         else:
             return False
     def __repr__(self):
-        return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
+        return f"TextNode(text={self.text}, type={self.text_type.value}, url={self.url})"
     
 
 def text_node_to_html_node(text_node):
