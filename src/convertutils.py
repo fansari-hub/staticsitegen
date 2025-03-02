@@ -14,17 +14,16 @@ def markdown_to_html_node(markdown):
     for block in markdown_blocks:
         block_type = block_to_block_type(block)
         block_html_node = map_block_to_html_node(block_type, block)
-        block_body_text = strip_markup(block, block_type)
-        children_nodes = text_to_textnodes(block_body_text)
+        block_text_stripped = strip_markup(block, block_type)
         
-        child_html_nodes = []
-        for child in children_nodes:
-            child_html_nodes.append(text_node_to_html_node(child))
-
-        block_html_node.children = child_html_nodes
+        if block_type != BlockType.CODE_BLOCK:
+            block_html_node.children = text_to_children(block_text_stripped)
+        else:
+            block_html_node.children[0].children = [LeafNode(tag=None, value=f"{block_text_stripped}")]
+        
         block_html_nodes.append(block_html_node)
 
-    top_html_node.children = block_html_nodes    
+    top_html_node.children = block_html_nodes
     return top_html_node
 
 def map_block_to_html_node(block_type, block):
@@ -34,13 +33,14 @@ def map_block_to_html_node(block_type, block):
             case BlockType.HEADING:
                 node = ParentNode(map_block_header_tag(block), None, None)
             case BlockType.CODE_BLOCK:
-                node = ParentNode("code", None, None)
+                node_c = ParentNode("code", None, None)
+                node = ParentNode("pre", children=[node_c], prop=None)
             case BlockType.QUOTE_BLOCK:
                 node = ParentNode("blockquote", None, None)
             case BlockType.UL:
-                node = ParentNode("UL", None, None)
+                node = ParentNode("ul", None, None)
             case BlockType.OL:
-                node = ParentNode("OL", None, None)
+                node = ParentNode("ol", None, None)
             case _:
                 node = node = ParentNode("p", None, None)
         return node
@@ -49,9 +49,9 @@ def strip_markup(block, block_type):
     block_body_text = ""
     match (block_type):
         case BlockType.P:
-            block_body_text = block
+            block_body_text = block.replace("\n", "<BR/>")
         case BlockType.HEADING:
-            block_body_text = block.lstrip("#")
+            block_body_text = block.lstrip("#").replace("\n", "<BR/>")
         case BlockType.CODE_BLOCK:
             block_body_text = block[3:-3]
         case BlockType.QUOTE_BLOCK:
@@ -100,8 +100,9 @@ def map_block_header_tag(block):
     else:
         raise Exception("This is not a header block!")
     
-    pass
-    #print("THE CHIDREL!!!!!!!")
-    #print(text)
-    #text_nodes = text_to_textnodes(text)
-    #pprint.pp(text_nodes)
+def text_to_children(text):
+        children_nodes = text_to_textnodes(text)
+        child_html_nodes = []
+        for child in children_nodes:
+            child_html_nodes.append(text_node_to_html_node(child))
+        return child_html_nodes
