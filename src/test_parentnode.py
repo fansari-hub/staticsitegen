@@ -24,6 +24,14 @@ class TestParentNode(unittest.TestCase):
         child_node_c = LeafNode("button", "submit")
         parent_node = ParentNode("div", [child_node_a, child_node_b, child_node_c])
         self.assertEqual(parent_node.to_html(), "<div><span>span_content</span><p>paragraph_content</p><button>submit</button></div>")
+    
+    def test_to_html_with_multi_children_and_normal_text(self):
+        child_node_a = LeafNode("b", "Bold Text")
+        child_node_b = LeafNode(None, "Normal Text")
+        child_node_c = LeafNode("i", "Italic Text")
+        child_node_d = LeafNode(None, "More Normal Text")
+        parent_node = ParentNode("p", [child_node_a, child_node_b, child_node_c, child_node_d])
+        self.assertEqual(parent_node.to_html(), "<p><b>Bold Text</b>Normal Text<i>Italic Text</i>More Normal Text</p>")
 
         
     def test_to_html_with_multi_grandchildren(self):

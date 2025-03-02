@@ -1,11 +1,13 @@
 from htmlnode import HTMLNode
 
 class ParentNode(HTMLNode):
+    
     def __init__(self, tag=None, children=None, prop=None):
         self.tag = tag
         self.children=children
         self.prop = prop
         super().__init__(tag=self.tag, value=None, children=self.children, prop=self.prop)
+    
     def to_html(self):
         if self.tag == None:
             raise ValueError("All Parent nodes must have a tag")

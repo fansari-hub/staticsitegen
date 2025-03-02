@@ -1,6 +1,5 @@
 from enum import Enum
 import re
-import pprint
 
 class BlockType(Enum):
     P = "paragraph"
@@ -14,13 +13,13 @@ def block_to_block_type(markdown_block):
 
     if (re.match(r"^#+ [\w\d\s]+", markdown_block)) != None:
         return BlockType.HEADING
-    elif (re.match(r"^(```)[\w\d\s]+(```)$", markdown_block)) != None:
+    elif (re.match(r"^(```)[\w\d\s\*\.\\]+(```)$", markdown_block)) != None:
         return BlockType.CODE_BLOCK
-    elif (re.match(r"^(?:>.*(?:\r?\n|$))+$", markdown_block, re.MULTILINE)) != None:
+    elif (re.match(r"^(?:>.*(?:\r?\n|$))+$", markdown_block)) != None:
         return BlockType.QUOTE_BLOCK
-    elif (re.match(r"^(?:-\s.*(?:\r?\n|$))+$", markdown_block, re.MULTILINE)) != None:
+    elif (re.match(r"^(?:-\s.*(?:\r?\n|$))+$", markdown_block)) != None:
         return BlockType.UL
-    elif (re.match(r"^(?:\d\..*(?:\r?\n|$))+$", markdown_block, re.MULTILINE)) != None:
+    elif (re.match(r"^(?:\d\..*(?:\r?\n|$))+$", markdown_block)) != None:
         return BlockType.OL
     else:
         return BlockType.P
