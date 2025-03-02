@@ -1,6 +1,6 @@
 import unittest
 
-from splitnode import split_nodes_delimiter
+from nodeutils import split_nodes_delimiter, extract_markdown_links, extract_markdown_images
 from textnode import *
 
 class TestSpliteNode(unittest.TestCase):
@@ -91,7 +91,29 @@ class TestSpliteNode(unittest.TestCase):
             split_nodes_delimiter([node], "`", TextType.CODE)
             self.assertEqual(str(context.exception), "Invalid Markdown: No closing delimiter found.")
 
+    def test_extract_markdown_images(self):
+        result = extract_markdown_images("This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
+        self.assertEqual(result, [('rick roll', 'https://i.imgur.com/aKaOqIh.gif'), ('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')])
 
+    def test_extract_markdown_images_one_bad(self):
+        result = extract_markdown_images("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
+        self.assertEqual(result, [('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')])
+
+    def test_extract_markdown_images_all_bad(self):
+        result = extract_markdown_images("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan]https://i.imgur.com/fJRm4Vk.jpeg)")
+        self.assertEqual(result, [])    
+
+    def test_extract_markdown_link(self):
+        result = extract_markdown_links("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)")
+        self.assertEqual(result, [('to boot dev', 'https://www.boot.dev'), ('to youtube', 'https://www.youtube.com/@bootdotdev')])
+
+    def test_extract_markdown_link_one_bad(self):
+        result = extract_markdown_links("This is text with a link to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)")
+        self.assertEqual(result, [('to youtube', 'https://www.youtube.com/@bootdotdev')])
+
+    def test_extract_markdown_link_all_bad(self):
+        result = extract_markdown_links("This is text with a link to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev")
+        self.assertEqual(result, [])
 
 if __name__ == "__main__":
     unittest.main()
