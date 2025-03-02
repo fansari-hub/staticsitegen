@@ -1,6 +1,7 @@
 import unittest
+import pprint
 
-from nodeutils import split_nodes_delimiter, extract_markdown_links, extract_markdown_images, split_nodes_link, split_nodes_image
+from nodeutils import split_nodes_delimiter, extract_markdown_links, extract_markdown_images, split_nodes_link, split_nodes_image, text_to_textnodes
 from textnode import *
 
 class TestSpliteNode(unittest.TestCase):
@@ -181,7 +182,34 @@ class TestSpliteNode(unittest.TestCase):
             [TextNode("This is text with a link https://www.boot.dev", TextType.TEXT)]
         self.assertEqual(result, expected)
 
+    def test_text_to_textnodes_happypath(self):
+        result = text_to_textnodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+        expected = \
+        [TextNode("This is ", TextType.TEXT, url=None),
+        TextNode("text", TextType.BOLD, url=None),
+        TextNode(" with an ", TextType.TEXT, url=None),
+        TextNode("italic", TextType.ITALIC, url=None),
+        TextNode(" word and a ", TextType.TEXT, url=None),
+        TextNode("code block", TextType.CODE, url=None),
+        TextNode(" and an ", TextType.TEXT, url=None),
+        TextNode("obi wan image", TextType.IMAGE, url="https://i.imgur.com/fJRm4Vk.jpeg"),
+        TextNode(" and a ", TextType.TEXT, url=None),
+        TextNode("link", TextType.LINK, url="https://boot.dev")]
+        #pprint.pp(result)
+        self.assertEqual(result, expected)
 
+    def test_text_to_textnodes_nomarkdown(self):
+        result = text_to_textnodes("This is text with an italic word and a code block and an image at https://i.imgur.com/fJRm4Vk.jpeg and a link at https://boot.dev")
+        expected = \
+        [TextNode("This is text with an italic word and a code block and an image at https://i.imgur.com/fJRm4Vk.jpeg and a link at https://boot.dev", TextType.TEXT, url=None)]
+        #pprint.pp(result)
+        self.assertEqual(result, expected)
+
+    def test_text_to_textnodes_emptytext(self):
+        result = text_to_textnodes("")
+        expected = []
+        #pprint.pp(result)
+        self.assertEqual(result, expected)
 
 if __name__ == "__main__":
     unittest.main()

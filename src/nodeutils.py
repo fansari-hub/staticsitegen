@@ -22,9 +22,9 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     string_list.append(TextNode(current_text[0:delim_open], TextType.TEXT))
                     
                 #apend text inside delimiter
-                string_list.append(TextNode(current_text[delim_open+1:delim_closed], text_type))
+                string_list.append(TextNode(current_text[delim_open+len(delimiter):delim_closed], text_type))
 
-                current_text = current_text[delim_closed+1:]
+                current_text = current_text[delim_closed+len(delimiter):]
 
         else:
             #non-text nodes
@@ -60,7 +60,6 @@ def split_nodes_image(old_nodes):
             node_list.append(node)
     return node_list
         
-
 def split_nodes_link(old_nodes):
     node_list = []
 
@@ -91,14 +90,13 @@ def split_nodes_link(old_nodes):
             node_list.append(node)
     return node_list
 
-
 def find_delimiters(text, delimiter_a, delimiter_b=None, start=0):
     if delimiter_b == None:
         delimiter_b = delimiter_a
     delim_open = text.find(delimiter_a, start)
    
     if delim_open != -1:
-        delim_close = text.find(delimiter_b, delim_open + 1)
+        delim_close = text.find(delimiter_b, delim_open + len(delimiter_a))
     else:
         delim_close = -1
 
@@ -114,3 +112,12 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
+
+def text_to_textnodes(text):
+    node = TextNode(text, TextType.TEXT)
+    nodes1 = split_nodes_delimiter([node], "**", TextType.BOLD)
+    nodes2 = split_nodes_delimiter(nodes1, "_", TextType.ITALIC)
+    nodes3 = split_nodes_delimiter(nodes2, "`", TextType.CODE)
+    nodes4 = split_nodes_image(nodes3)
+    nodes5 = split_nodes_link(nodes4)
+    return nodes5
