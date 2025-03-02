@@ -2,6 +2,7 @@ import unittest
 import pprint
 
 from nodeutils import split_nodes_delimiter, extract_markdown_links, extract_markdown_images, split_nodes_link, split_nodes_image, text_to_textnodes
+
 from textnode import *
 
 class TestSpliteNode(unittest.TestCase):
@@ -209,7 +210,7 @@ class TestSpliteNode(unittest.TestCase):
         result = text_to_textnodes("")
         expected = []
         #pprint.pp(result)
-        self.assertEqual(result, expected)
+        self.assertEqual(result, expected)   
 
 if __name__ == "__main__":
     unittest.main()
