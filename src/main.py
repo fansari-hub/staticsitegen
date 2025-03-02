@@ -1,20 +1,38 @@
-from textnode import *
-from htmlnode import *
-from leafnode import *
-from parentnode import *
-from nodeutils import *
+import os
+import shutil
+import pprint
+
+DEFAULT_SOURCE_STATIC_FOLDER = "./static"
+DEFAULT_DEST_PUBLIC_FOLDER = "./public"
+
+
+def copy_files_static_to_public(source_folder=DEFAULT_SOURCE_STATIC_FOLDER, dest_folder=DEFAULT_DEST_PUBLIC_FOLDER):
+    if not os.path.exists(source_folder):
+        raise Exception("STATIC folder does not exist!!")
+    
+    if not os.path.exists(dest_folder):
+        raise Exception("PUBLIC folder does not exist!!")
+    
+    pubic_folder_files = os.listdir(dest_folder)
+
+#Delete Files
+    for item in pubic_folder_files:
+        file_path = os.path.join(dest_folder, item)
+        if os.path.isfile(file_path):
+            print(f"Deleting file: {file_path}")
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            print(f"Deleting folder and contents: {file_path}")
+            shutil.rmtree(file_path)
+
+#Copy files
+    print(f"Copying files from {source_folder} to {dest_folder}")
+    shutil.copytree(source_folder, dest_folder, dirs_exist_ok=True)
+    
 
 
 def main():
-    #node = TextNode("This is `text` with a `code block` word", TextType.TEXT)
-    #split_nodes_delimiter([node], "`", TextType.CODE)
-    #node = TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)", TextType.TEXT)
-    #print(split_nodes_image([node]))
-    #node1 = TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", TextType.TEXT)
-    #print(split_nodes_link([node1]))
-    #extract_markdown_images("This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg")
-    #extract_markdown_links("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)")
-    text_to_textnodes()
-    print("****")
+    print("Starting Static Site Genetor")
+    copy_files_static_to_public()
 
 main()
