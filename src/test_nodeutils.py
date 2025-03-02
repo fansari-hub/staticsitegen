@@ -1,6 +1,6 @@
 import unittest
 
-from nodeutils import split_nodes_delimiter, extract_markdown_links, extract_markdown_images
+from nodeutils import split_nodes_delimiter, extract_markdown_links, extract_markdown_images, split_nodes_link, split_nodes_image
 from textnode import *
 
 class TestSpliteNode(unittest.TestCase):
@@ -114,6 +114,74 @@ class TestSpliteNode(unittest.TestCase):
     def test_extract_markdown_link_all_bad(self):
         result = extract_markdown_links("This is text with a link to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev")
         self.assertEqual(result, [])
+
+    def test_image_middle_multi(self):
+        node = TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)", TextType.TEXT)
+        result = split_nodes_image([node])
+        expected = \
+            [TextNode("This is text with an ", TextType.TEXT), 
+            TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png")]
+        self.assertEqual(result, expected)
+
+    def test_image_start_end_multi(self):
+        node = TextNode("![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)", TextType.TEXT)
+        result = split_nodes_image([node])
+        expected = \
+            [TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second image", TextType.IMAGE, "https://i.imgur.com/3elNhQu.png")]
+        self.assertEqual(result, expected)
+
+    def test_image_single_full(self):
+        node = TextNode("![image](https://i.imgur.com/zjjcJKZ.png)", TextType.TEXT)
+        result = split_nodes_image([node])
+        expected = \
+            [TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png")]
+        self.assertEqual(result, expected)
+
+    def test_image_noimage(self):
+        node = TextNode("image https://i.imgur.com/zjjcJKZ.png", TextType.TEXT)
+        result = split_nodes_image([node])
+        expected = \
+            [TextNode("image https://i.imgur.com/zjjcJKZ.png", TextType.TEXT)]
+        self.assertEqual(result, expected)
+
+    def test_link_middle_multi(self):
+        node = TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", TextType.TEXT)
+        result = split_nodes_link([node])
+        expected = \
+            [TextNode("This is text with a link ", TextType.TEXT), 
+            TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")]
+        self.assertEqual(result, expected)
+
+    def test_link_start_end_multi(self):
+        node = TextNode("[to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", TextType.TEXT)
+        result = split_nodes_link([node])
+        expected = \
+            [TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")]
+        self.assertEqual(result, expected)
+
+    def test_link_single_full(self):
+        node = TextNode("[to boot dev](https://www.boot.dev)", TextType.TEXT)
+        result = split_nodes_link([node])
+        expected = \
+            [TextNode("to boot dev", TextType.LINK, "https://www.boot.dev")]
+        self.assertEqual(result, expected)
+
+    def test_link_nolink(self):
+        node = TextNode("This is text with a link https://www.boot.dev", TextType.TEXT)
+        result = split_nodes_link([node])
+        expected = \
+            [TextNode("This is text with a link https://www.boot.dev", TextType.TEXT)]
+        self.assertEqual(result, expected)
+
+
 
 if __name__ == "__main__":
     unittest.main()

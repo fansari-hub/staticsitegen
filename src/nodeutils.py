@@ -32,17 +32,73 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     return string_list
 
 def split_nodes_image(old_nodes):
-    pass
+    node_list = []
+    for node in old_nodes:
+        if node.text_type == TextType.TEXT:
+            current_text = node.text
+            while True:
+                delim_open, delim_closed = find_delimiters(current_text, "!", ")")
+
+                #No more delimiters left to process
+                if delim_open == -1:
+                    if current_text != "":
+                        node_list.append(TextNode(current_text, TextType.TEXT))
+                    break
+                  
+                #append text before the delimiter
+                if delim_open > 0:
+                    node_list.append(TextNode(current_text[0:delim_open], TextType.TEXT))
+                    
+                #append text inside delimiter
+                result = extract_markdown_images(current_text[delim_open:delim_closed+1])
+                image_alt , image_url = result[0]
+                node_list.append(TextNode(image_alt, TextType.IMAGE, image_url))
+                current_text = current_text[delim_closed+1:]
+        
+        else:
+            #non-text nodes
+            node_list.append(node)
+    return node_list
         
 
 def split_nodes_link(old_nodes):
-    pass
+    node_list = []
 
-def find_delimiters(text, delimiter, start=0):
-    delim_open = text.find(delimiter, start)
+    for node in old_nodes:
+        if node.text_type == TextType.TEXT:
+            current_text = node.text
+            while True:
+                delim_open, delim_closed = find_delimiters(current_text, "[", ")")
+
+                #No more delimiters left to process
+                if delim_open == -1:
+                    if current_text != "":
+                        node_list.append(TextNode(current_text, TextType.TEXT))
+                    break
+                  
+                #append text before the delimiter
+                if delim_open > 0:
+                    node_list.append(TextNode(current_text[0:delim_open], TextType.TEXT))
+                    
+                #append text inside delimiter
+                result = extract_markdown_links(current_text[delim_open:delim_closed+1])
+                link_txt , link_url = result[0]
+                node_list.append(TextNode(link_txt, TextType.LINK, link_url))
+                current_text = current_text[delim_closed+1:]
+        
+        else:
+            #non-text nodes
+            node_list.append(node)
+    return node_list
+
+
+def find_delimiters(text, delimiter_a, delimiter_b=None, start=0):
+    if delimiter_b == None:
+        delimiter_b = delimiter_a
+    delim_open = text.find(delimiter_a, start)
    
     if delim_open != -1:
-        delim_close = text.find(delimiter, delim_open + 1)
+        delim_close = text.find(delimiter_b, delim_open + 1)
     else:
         delim_close = -1
 
