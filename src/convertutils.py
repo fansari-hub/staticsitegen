@@ -49,17 +49,17 @@ def strip_markup(block, block_type):
     block_body_text = ""
     match (block_type):
         case BlockType.P:
-            block_body_text = block.replace("\n", "<BR/>")
+            block_body_text = block.replace("\n", "")
         case BlockType.HEADING:
-            block_body_text = block.lstrip("#").replace("\n", "<BR/>")
+            block_body_text = block.lstrip("#").lstrip().replace("\n", "")
         case BlockType.CODE_BLOCK:
             block_body_text = block[3:-3]
         case BlockType.QUOTE_BLOCK:
-            block_body_text = split_and_strip(block, ">", False, "<BR/>")
+            block_body_text = split_and_strip(block, ">", False, "")
         case BlockType.UL:
-            block_body_text = split_and_strip(block, "- ", False, "<BR/>", "li")
+            block_body_text = split_and_strip(block, "- ", False, "", "li")
         case BlockType.OL:
-            block_body_text = split_and_strip(block, ".", True, "<BR/>",  "li")
+            block_body_text = split_and_strip(block, ".", True, "",  "li")
         case _:
             raise Exception("Did not find valid block type!")
     return block_body_text
@@ -77,11 +77,11 @@ def split_and_strip(block, markup, counterType=False, newLine="\n", multi_line_t
             new_lines.append(current_line)
 
     if multi_line_tag == None:
-        return f"{newLine}".join(new_lines)
+        return f"{newLine}".join(new_lines).lstrip()
     else:
         new_lines_2 = []
         for line in new_lines:
-            new_lines_2.append(f"<{multi_line_tag}>{line}</{multi_line_tag}>")
+            new_lines_2.append(f"<{multi_line_tag}>{line.strip()}</{multi_line_tag}>")
         return "".join(new_lines_2)
         
 def map_block_header_tag(block):

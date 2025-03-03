@@ -15,8 +15,14 @@ class ParentNode(HTMLNode):
             raise ValueError("All Parent nodes must have children")
 
         # Start with the opening tag of the parent
-        html_content = f"<{self.tag}>"
-
+        if self.prop != None:
+            prop_string = self.props_to_html()
+            html_content = f"<{self.tag}{prop_string}>"
+        else:
+            html_content = f"<{self.tag}>"
+        
+        
+        
         # Iterate over the children (recursive)
         for child in self.children:
             html_content += child.to_html()
