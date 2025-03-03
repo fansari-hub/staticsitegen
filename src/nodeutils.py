@@ -37,7 +37,13 @@ def split_nodes_image(old_nodes):
         if node.text_type == TextType.TEXT:
             current_text = node.text
             while True:
-                delim_open, delim_closed = find_delimiters(current_text, "!", ")")
+                delim_open, delim_closed = find_delimiters(current_text, "!", ")", no_missing_end_delimiter_assert=True)
+
+                #Not a image delimiter, just use of same character in text, ignore
+                if delim_closed == -2:
+                    node_list.append(TextNode(current_text, TextType.TEXT))
+                    #node_list.append(node)
+                    break
 
                 #No more delimiters left to process
                 if delim_open == -1:
@@ -51,7 +57,10 @@ def split_nodes_image(old_nodes):
                     
                 #append text inside delimiter
                 result = extract_markdown_images(current_text[delim_open:delim_closed+1])
+
+                #Need to check for this if it false delimiters were found
                 image_alt , image_url = result[0]
+
                 node_list.append(TextNode(image_alt, TextType.IMAGE, image_url))
                 current_text = current_text[delim_closed+1:]
         
@@ -67,7 +76,13 @@ def split_nodes_link(old_nodes):
         if node.text_type == TextType.TEXT:
             current_text = node.text
             while True:
-                delim_open, delim_closed = find_delimiters(current_text, "[", ")")
+                delim_open, delim_closed = find_delimiters(current_text, "[", ")", no_missing_end_delimiter_assert=True)
+
+
+                #Not a link delimiter, just use of same character in text, ignore
+                if delim_closed == -2:
+                    node_list.append(TextNode(current_text, TextType.TEXT))
+                    break
 
                 #No more delimiters left to process
                 if delim_open == -1:
@@ -90,7 +105,7 @@ def split_nodes_link(old_nodes):
             node_list.append(node)
     return node_list
 
-def find_delimiters(text, delimiter_a, delimiter_b=None, start=0):
+def find_delimiters(text, delimiter_a, delimiter_b=None, start=0, no_missing_end_delimiter_assert=False):
     if delimiter_b == None:
         delimiter_b = delimiter_a
     delim_open = text.find(delimiter_a, start)
@@ -101,7 +116,9 @@ def find_delimiters(text, delimiter_a, delimiter_b=None, start=0):
         delim_close = -1
 
     if delim_open !=-1 and delim_close == -1:
-        raise Exception("Invalid Markdown: No closing delimiter found.")
+        if no_missing_end_delimiter_assert == False:
+            raise Exception("Invalid Markdown: No closing delimiter found.")
+        return (-2, -2)
 
     return delim_open, delim_close
 

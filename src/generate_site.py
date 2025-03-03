@@ -1,8 +1,32 @@
 from blockutils import *
 from convertutils import *
+import shutil
 import re
 import os
+import pprint
 
+def copy_files_static_to_public(source_folder, dest_folder):
+    if not os.path.exists(source_folder):
+        raise Exception("STATIC folder does not exist!!")
+    
+    if not os.path.exists(dest_folder):
+        raise Exception("PUBLIC folder does not exist!!")
+    
+    pubic_folder_files = os.listdir(dest_folder)
+
+#Delete Files
+    for item in pubic_folder_files:
+        file_path = os.path.join(dest_folder, item)
+        if os.path.isfile(file_path):
+            print(f"\nDeleting file: {file_path}")
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            print(f"Deleting folder and contents: {file_path}")
+            shutil.rmtree(file_path)
+
+#Copy files
+    print(f"Copying files from {source_folder} to {dest_folder}")
+    shutil.copytree(source_folder, dest_folder, dirs_exist_ok=True)
 
 def extract_title(content):
     print(f"Reading Title from File:" )
@@ -23,7 +47,7 @@ def extract_title(content):
     return header_text
 
 def generate_page(from_path, template_path, dest_path):
-    print(f"Generating file from {from_path} to {dest_path} using {template_path}")
+    print(f"\nGenerating file from {from_path} to {dest_path} using {template_path}")
     
     
     markdown_file = open(from_path)
@@ -44,7 +68,38 @@ def generate_page(from_path, template_path, dest_path):
     new_html_file.write(formated_content_title)
     new_html_file.close()
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    print("\nStarting to generate pages for site....")
+    if not os.path.exists(dir_path_content):
+        raise Exception("source path does not exist!!")
     
+    if not os.path.exists(dest_dir_path):
+        raise Exception("destination path does not exist!!")
+    
+    if not os.path.exists(template_path):
+        raise Exception("template path does not exist!!")
+    
+    content_folder_files = os.listdir(dir_path_content)
+
+    for item in content_folder_files:
+        file_path = os.path.join(dir_path_content, item)
+        dest_path = os.path.join(dest_dir_path, item.split(".")[0] + ".html")
+        template_file = os.path.join(template_path, "template.html")
+        if os.path.isfile(file_path):
+            print(f"Found file: {file_path}")
+            generate_page(file_path, template_file, dest_path)
+        elif os.path.isdir(file_path):
+            print(f"Found folder: {file_path}")
+            dir_path_content_next = file_path
+            dest_dir_path_next = os.path.join(dest_dir_path, item)
+            os.mkdir(dest_dir_path_next)
+            generate_pages_recursive(dir_path_content_next, template_path, dest_dir_path_next)
+        
+    return None
+
+    pprint.pp(content_folder_files)
+    
+
 
     
 
